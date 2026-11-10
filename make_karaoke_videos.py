@@ -85,6 +85,26 @@ def run_checked(command: list[str], cwd: Path | None = None) -> str:
     return result.stdout.strip()
 
 
+def validate_ffmpeg_features() -> None:
+    """Fail early when the installed FFmpeg cannot render ASS karaoke."""
+    filters = run_checked(["ffmpeg", "-hide_banner", "-filters"])
+    if not any(line.split()[-1] == "ass" for line in filters.splitlines()
+               if line.split()):
+        raise ValueError(
+            "This FFmpeg build does not include the 'ass' subtitle filter "
+            "(libass). On macOS, install 'brew install ffmpeg-full' and "
+            "ensure its ffmpeg executable is first on PATH. "
+            "Verify with: ffmpeg -hide_banner -filters | grep ass"
+        )
+    encoders = run_checked(["ffmpeg", "-hide_banner", "-encoders"])
+    if not any(line.split()[1] == "libx264" for line in encoders.splitlines()
+               if len(line.split()) >= 2):
+        raise ValueError(
+            "This FFmpeg build does not include the 'libx264' encoder. "
+            "Install an FFmpeg build with libx264 support."
+        )
+
+
 def audio_duration(path: Path) -> float:
     value = run_checked([
         "ffprobe", "-v", "error", "-show_entries", "format=duration",
@@ -142,6 +162,7 @@ def main() -> None:
     for executable in ("ffmpeg", "ffprobe"):
         if not shutil.which(executable):
             raise ValueError(f"{executable} is not installed or not on PATH")
+    validate_ffmpeg_features()
     chosen = (tuple(PROFILES) if args.platform == "all" else (args.platform,))
     audio = check_file(args.audio, "Audio file")
     if "youtube" in chosen and (not args.image_wide or not args.ass_wide):
