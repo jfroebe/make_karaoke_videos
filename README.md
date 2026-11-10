@@ -1,2 +1,148 @@
 # make_karaoke_videos
-Generate karaoke lyric videos for YouTube, Instagram Reels, Stories, Feed, and TikTok using Python 3 and FFmpeg. Combines audio, background images, and synchronized ASS karaoke subtitles into high-quality H.264 MP4 videos. Supports multiple aspect ratios, customizable encoding, automatic duration detection, and batch rendering.
+
+Generate finished karaoke lyric videos using **Python 3**, **FFmpeg**, background artwork, a finished audio recording, and synchronized **ASS karaoke subtitles**. Render for YouTube, Instagram Reels/Stories/Feed, and TikTok without any third-party Python packages.
+
+## Requirements
+
+- Python 3.10 or newer
+- FFmpeg and FFprobe installed and on your `PATH`
+- FFmpeg compiled with **libass** (`ass` video filter) and **libx264** (H.264 encoder)
+- An audio file, background image(s), and karaoke `.ass` subtitle file(s)
+
+macOS with Homebrew:
+
+```bash
+brew install ffmpeg-full
+ffmpeg -hide_banner -filters | grep ' ass '
+ffmpeg -hide_banner -encoders | grep libx264
+```
+
+Use [elysy_to_karaoke_ass](https://github.com/jfroebe/elysy_to_karaoke_ass) to generate the properly timed ASS files from ELYSY's Enhanced SRT or JSON exports.
+
+## Quick start: render all three platforms
+
+```bash
+python3 make_karaoke_videos.py \
+  --audio "song.mp3" \
+  --image-wide "background-wide.png" \
+  --image-vertical "background-vertical.png" \
+  --ass-wide "lyrics-wide.ass" \
+  --ass-vertical "lyrics-vertical.ass" \
+  --ass-instagram "lyrics-instagram-reels.ass" \
+  --name "my-song" \
+  --output-dir "./videos"
+```
+
+Output:
+
+```text
+videos/
+├── my-song-youtube.mp4
+├── my-song-instagram-reels.mp4
+└── my-song-tiktok.mp4
+```
+
+All outputs contain H.264 video, AAC audio, and **burned-in karaoke subtitles**. Video length is derived from the audio using FFprobe. MP4 files are optimized for web playback (`+faststart`).
+
+## Platform sizes
+
+| Platform | `--platform` | `--instagram-format` | Size / aspect |
+| --- | --- | --- | --- |
+| YouTube | `youtube` | — | 1920 × 1080 (16:9) |
+| TikTok | `tiktok` | — | 1080 × 1920 (9:16) |
+| Instagram Reels | `instagram` | `reels` (default) | 1080 × 1920 (9:16) |
+| Instagram Stories | `instagram` | `story` | 1080 × 1920 (9:16) |
+| Instagram Feed | `instagram` | `feed` | 1080 × 1350 (4:5) |
+
+### Render just one platform
+
+You do **not** need to supply unrelated YouTube artwork and subtitles when rendering only TikTok or Instagram:
+
+```bash
+# YouTube (lyrics can be placed on the right of landscape artwork)
+python3 make_karaoke_videos.py --platform youtube \
+  --audio song.mp3 --image-wide background-wide.png --ass-wide lyrics-wide.ass
+
+# TikTok
+python3 make_karaoke_videos.py --platform tiktok \
+  --audio song.mp3 --image-vertical background-vertical.png \
+  --ass-vertical lyrics-vertical.ass
+
+# Instagram Reels
+python3 make_karaoke_videos.py --platform instagram --instagram-format reels \
+  --audio song.mp3 --image-vertical background-vertical.png \
+  --ass-instagram lyrics-instagram-reels.ass
+
+# Instagram Stories
+python3 make_karaoke_videos.py --platform instagram --instagram-format story \
+  --audio song.mp3 --image-vertical background-vertical.png \
+  --ass-instagram lyrics-instagram-story.ass
+
+# Instagram Feed (4:5)
+python3 make_karaoke_videos.py --platform instagram --instagram-format feed \
+  --audio song.mp3 --image-instagram background-feed.png \
+  --ass-instagram lyrics-instagram-feed.ass
+```
+
+When rendering all platforms, include all three ASS files. If a dedicated portrait image is omitted, the script can reuse the wide image, but a purpose-composed portrait background is strongly recommended.
+
+### Hank example
+
+```bash
+python3 make_karaoke_videos.py \
+  --audio "The_Rangers_Promise.mp3" \
+  --image-wide "Hank-landscape.png" \
+  --image-vertical "Hank-portrait.png" \
+  --ass-wide "Hank_wide.ass" \
+  --ass-vertical "Hank_vertical.ass" \
+  --ass-instagram "Hank_instagram-reels.ass" \
+  --name "The_Rangers_Promise" --output-dir "./videos"
+```
+
+In the landscape image, keep Hank's portraits on the **left** and empty space on the **right**, matching the placement of the ELYSY `wide` karaoke ASS preset.
+
+## Options
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `--audio` | required | MP3, WAV, M4A or another FFmpeg-readable audio file |
+| `--image-wide` | required for YouTube | 16:9 artwork |
+| `--image-vertical` | optional | 9:16 portrait artwork; falls back to wide image |
+| `--image-instagram` | optional | Instagram-specific artwork; falls back to portrait |
+| `--ass-wide` | required for YouTube | ASS subtitles generated with ELYSY `wide` profile |
+| `--ass-vertical` | required for TikTok | ASS subtitles generated with ELYSY `vertical` profile |
+| `--ass-instagram` | required for Instagram | ASS subtitles matching the Instagram format |
+| `--platform` | `all` | `all`, `youtube`, `instagram`, or `tiktok` |
+| `--instagram-format` | `reels` | `reels`, `story`, or `feed` |
+| `--output-dir` | `videos` | Directory for rendered MP4 files |
+| `--name` | Audio filename | Output filename prefix |
+| `--fit` | `cover` | `cover` fills/crops; `contain` letterboxes instead |
+| `--fps` | `30` | Frame rate: 24, 25, 30, or 60 |
+| `--crf` | `19` | Video quality (0–51, lower means higher quality) |
+| `--preset` | `medium` | libx264 speed/efficiency preset |
+| `--overwrite` | off | Overwrite existing outputs |
+
+Full help: `python3 make_karaoke_videos.py --help`.
+
+## Notes and troubleshooting
+
+- **Video layout:** The video builder scales/crops artwork to the requested platform size. It doesn't reposition ASS subtitles; positioning comes from the subtitle converter's profile.
+- **Safe zones:** Instagram and TikTok place UI controls over parts of the video. Preview on a phone before publishing; use the matching Instagram-specific ASS preset.
+- **Spaces in paths:** Wrap paths in quotes. The script copies subtitle files to an isolated temporary directory to avoid FFmpeg filter escaping issues.
+- **Existing output:** The script stops instead of overwriting MP4 files unless `--overwrite` is specified.
+- **Missing files:** It prints a concise `Error:` message with a nonzero exit status, not a Python traceback.
+- **Audio:** Do lyric alignment with the **final** song file first so the timing matches the rendered soundtrack.
+- **Platform exports:** This creates MP4 video files; it does **not** upload them to YouTube, Instagram, or TikTok.
+
+## Development and local testing
+
+All tests and FFmpeg integration checks should run on the local META environment (`chatgpt-dev` / `chatgpt-build-02`), **not GitHub-hosted runners**. No GitHub Actions workflow is included.
+
+```bash
+python3 -m py_compile make_karaoke_videos.py
+python3 -m unittest discover -s tests -v
+ffmpeg -hide_banner -filters | grep ' ass '
+ffmpeg -hide_banner -encoders | grep libx264
+```
+
+Functional smoke tests should render very short audio with sample artwork and ASS subtitles, then inspect the output sizes with FFprobe. The initial development checks used an available local execution runtime; **direct testing on the META hosts was not available in that session**.
