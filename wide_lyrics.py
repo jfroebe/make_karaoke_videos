@@ -7,8 +7,7 @@ from pathlib import Path
 
 
 DIALOGUE_PREFIX = "Dialogue:"
-KARAOKE_TAG = re.compile(r"\\{\\(?:k|kf|ko)\\d+\\}", re.IGNORECASE)
-OVERRIDE_TAG = re.compile(r"\\{[^}]*\\}")
+OVERRIDE_TAG = re.compile(r"\{[^}]*\}")
 
 
 def _parse_time(value: str) -> int:
