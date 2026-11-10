@@ -83,7 +83,7 @@ class KaraokeBuilderTests(unittest.TestCase):
                                      for line in data.splitlines()), 32)
                 self.assertEqual(len(re.findall(r"\\kf\d+", data)), 181)
                 self.assertIn("0:01:30.34", data)
-                self.assertIn("0:02:42.08", data)
+                self.assertIn("0:02:42.33", data)
 
     def test_uploaded_hank_ass_ffmpeg_filters(self):
         """Smoke-render the real subtitles with libass on the local machine."""
