@@ -123,8 +123,6 @@ class KaraokeBuilderTests(unittest.TestCase):
 
     def test_vertical_whole_word_highlighting_preserves_timing(self):
         """All real vertical fixtures retain 181 words and original layout."""
-        import re
-
         from make_karaoke_videos import build_whole_word_lyrics
 
         names = (
@@ -135,25 +133,16 @@ class KaraokeBuilderTests(unittest.TestCase):
         )
         for name in names:
             with self.subTest(file=name):
-                original = (ROOT / "tests" / "fixtures" / name)
+                original = ROOT / "tests" / "fixtures" / name
                 with tempfile.TemporaryDirectory() as folder:
                     output = Path(folder) / "lyrics.ass"
                     build_whole_word_lyrics(original, output)
                     before = original.read_text(encoding="utf-8-sig")
                     after = output.read_text(encoding="utf-8")
-                    self.assertEqual(before.count(r"\\kf"), 181)
-                    self.assertEqual(len(re.findall(r"\\k(?=\\d)", after)), 181)
-                    self.assertNotIn(r"\\kf", after)
-                    self.assertEqual(
-                        [line.split(",", 3)[:3] for line in before.splitlines()
-                         if line.startswith("Dialogue:")],
-                        [line.split(",", 3)[:3] for line in after.splitlines()
-                         if line.startswith("Dialogue:")],
-                    )
-                    self.assertEqual(
-                        re.sub(r"\\\\kf(?=\\d)", r"\\\\k", before),
-                        after,
-                    )
+                    self.assertEqual(before.count(r"\kf"), 181)
+                    self.assertEqual(after.count(r"\k"), 181)
+                    self.assertNotIn(r"\kf", after)
+                    self.assertEqual(before.replace(r"\kf", r"\k"), after)
 
     def test_missing_file_without_traceback(self):
         result = subprocess.run(
