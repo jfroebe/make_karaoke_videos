@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from wide_lyrics import build_wide_lyrics
+from make_karaoke_videos import build_wide_lyrics
 
 
 ROOT = Path(__file__).resolve().parents[1]
