@@ -128,7 +128,7 @@ Full help: `python3 make_karaoke_videos.py --help`.
 
 - **Video layout:** The video builder scales/crops artwork to the requested platform size. It doesn't reposition ASS subtitles; positioning comes from the subtitle converter's profile.
 - **Safe zones:** Instagram and TikTok place UI controls over parts of the video. Preview on a phone before publishing; use the matching Instagram-specific ASS preset.
-- **Spaces in paths:** Wrap paths in quotes. The script copies subtitle files to an isolated temporary directory to avoid FFmpeg filter escaping issues.
+- **FFmpeg ASS filter parsing:** Use the current script, which specifies `ass=filename=lyrics.ass` explicitly to avoid ambiguous FFmpeg option parsing. If an older version fails with `No option name near 'lyrics.ass'`, update your local script and try again.\n- **Spaces in paths:** Wrap paths in quotes. The script copies subtitle files to an isolated temporary directory to avoid FFmpeg filter escaping issues.
 - **Existing output:** The script stops instead of overwriting MP4 files unless `--overwrite` is specified.
 - **Missing files:** It prints a concise `Error:` message with a nonzero exit status, not a Python traceback.
 - **Audio:** Do lyric alignment with the **final** song file first so the timing matches the rendered soundtrack.
