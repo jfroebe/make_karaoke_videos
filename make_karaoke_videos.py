@@ -184,7 +184,7 @@ def build_whole_word_lyrics(source: Path, target: Path) -> None:
     lines = []
     for line in data.splitlines(keepends=True):
         if line.startswith("Dialogue:"):
-            line = re.sub(r"\\\\(?:kf|ko)(?=\\d)", r"\\\\k", line, flags=re.I)
+            line = re.sub(r"\\(?:kf|ko)(?=\d)", r"\\k", line, flags=re.I)
         lines.append(line)
     target.write_text("".join(lines), encoding="utf-8")
 
