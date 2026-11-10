@@ -121,6 +121,40 @@ class KaraokeBuilderTests(unittest.TestCase):
                     )
                     self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_vertical_whole_word_highlighting_preserves_timing(self):
+        """All real vertical fixtures retain 181 words and original layout."""
+        import re
+
+        from make_karaoke_videos import build_whole_word_lyrics
+
+        names = (
+            "Hank_vertical.ass",
+            "Hank_instagram-reels.ass",
+            "Hank_instagram-story.ass",
+            "Hank_instagram-feed.ass",
+        )
+        for name in names:
+            with self.subTest(file=name):
+                original = (ROOT / "tests" / "fixtures" / name)
+                with tempfile.TemporaryDirectory() as folder:
+                    output = Path(folder) / "lyrics.ass"
+                    build_whole_word_lyrics(original, output)
+                    before = original.read_text(encoding="utf-8-sig")
+                    after = output.read_text(encoding="utf-8")
+                    self.assertEqual(before.count(r"\\kf"), 181)
+                    self.assertEqual(len(re.findall(r"\\k(?=\\d)", after)), 181)
+                    self.assertNotIn(r"\\kf", after)
+                    self.assertEqual(
+                        [line.split(",", 3)[:3] for line in before.splitlines()
+                         if line.startswith("Dialogue:")],
+                        [line.split(",", 3)[:3] for line in after.splitlines()
+                         if line.startswith("Dialogue:")],
+                    )
+                    self.assertEqual(
+                        re.sub(r"\\\\kf(?=\\d)", r"\\\\k", before),
+                        after,
+                    )
+
     def test_missing_file_without_traceback(self):
         result = subprocess.run(
             [sys.executable, str(ROOT / "make_karaoke_videos.py"),
