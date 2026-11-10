@@ -15,6 +15,8 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
+from wide_lyrics import build_wide_lyrics
+
 
 @dataclass(frozen=True)
 class VideoProfile:
@@ -64,6 +66,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--preset", default="medium",
                         choices=("ultrafast", "superfast", "veryfast", "faster", "fast",
                                  "medium", "slow", "slower"))
+    parser.add_argument("--wide-lines", type=int, default=5,
+                        help="Visible lyric lines for YouTube (1 keeps original ASS layout)")
     parser.add_argument("--overwrite", action="store_true", help="Overwrite existing videos")
     return parser.parse_args()
 
@@ -134,7 +138,10 @@ def render(label: str, image: Path, audio: Path, ass: Path, target: Path,
     # FFmpeg filtergraph escaping problems with spaces, colons and apostrophes.
     with tempfile.TemporaryDirectory(prefix="karaoke-ass-") as work:
         temp = Path(work)
-        shutil.copyfile(ass, temp / "lyrics.ass")
+        if label == "youtube" and args.wide_lines > 1:
+            build_wide_lyrics(ass, temp / "lyrics.ass", visible=args.wide_lines)
+        else:
+            shutil.copyfile(ass, temp / "lyrics.ass")
         vf = f"{scale_filter(width, height, args.fit)},ass=filename=lyrics.ass"
         command = [
             "ffmpeg", "-hide_banner", "-nostdin", "-loglevel", "error",
@@ -158,6 +165,8 @@ def render(label: str, image: Path, audio: Path, ass: Path, target: Path,
 
 def main() -> None:
     args = parse_args()
+    if not 1 <= args.wide_lines <= 7:
+        raise ValueError("--wide-lines must be between 1 and 7")
     if not (0 <= args.crf <= 51):
         raise ValueError("--crf must be between 0 and 51")
     for executable in ("ffmpeg", "ffprobe"):
