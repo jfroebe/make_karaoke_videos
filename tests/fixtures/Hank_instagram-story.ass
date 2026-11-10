@@ -12,35 +12,48 @@ Style: Karaoke,Arial,54,&H00F5D27B,&H00FFFFFF,&H00201510,&H85000000,1,0,0,0,100,
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-Dialogue: 0,0:01:30.34,0:01:32.24,Karaoke,,0,0,0,,{\kf32}Six{\kf32} young{\kf32} friends,{\kf32} one{\kf32} summer{\kf32} ride,
-Dialogue: 0,0:01:32.26,0:01:33.84,Karaoke,,0,0,0,,{\kf32}Through{\kf32} the{\kf32} darkness,{\kf32} worlds{\kf32} collide.
-Dialogue: 0,0:01:33.86,0:01:36.08,Karaoke,,0,0,0,,{\kf32}A{\kf32} magic{\kf32} bow,{\kf32} a{\kf32} Ranger's{\kf32} name,{\kf32} Dungeon
-Dialogue: 0,0:01:36.10,0:01:38.32,Karaoke,,0,0,0,,{\kf32}Master{\kf32} chose{\kf32} me{\kf32} to{\kf32} lead{\kf32} the{\kf32} way.
-Dialogue: 0,0:01:38.34,0:01:39.92,Karaoke,,0,0,0,,{\kf32}Through{\kf32} dragons'{\kf32} fire{\kf32} and{\kf32} endless
-Dialogue: 0,0:01:39.94,0:01:42.16,Karaoke,,0,0,0,,{\kf32}night,{\kf32} I{\kf32} led{\kf32} my{\kf32} friends{\kf32} through{\kf32} every
-Dialogue: 0,0:01:42.18,0:01:44.08,Karaoke,,0,0,0,,{\kf32}fight.{\kf32} His{\kf32} riddles{\kf32} drove{\kf32} me{\kf32} half
-Dialogue: 0,0:01:44.10,0:01:46.32,Karaoke,,0,0,0,,{\kf32}insane,{\kf32} But{\kf32} he{\kf32} always{\kf32} showed{\kf32} the{\kf32} way.
-Dialogue: 0,0:01:46.34,0:01:48.24,Karaoke,,0,0,0,,{\kf32}Then{\kf32} Dungeon{\kf32} Master{\kf32} passed{\kf32} away,{\kf32} And
-Dialogue: 0,0:01:48.26,0:01:50.16,Karaoke,,0,0,0,,{\kf32}all{\kf32} his{\kf32} answers{\kf32} turned{\kf32} to{\kf32} clay.
-Dialogue: 0,0:01:50.18,0:01:52.08,Karaoke,,0,0,0,,{\kf32}Thirty{\kf32} years{\kf32} beneath{\kf32} these{\kf32} skies,{\kf32} I
-Dialogue: 0,0:01:52.10,0:01:54.32,Karaoke,,0,0,0,,{\kf32}watched{\kf32} the{\kf32} hope{\kf32} fade{\kf32} from{\kf32} our{\kf32} eyes.
-Dialogue: 0,0:01:54.34,0:01:56.56,Karaoke,,0,0,0,,{\kf32}I{\kf32} made{\kf32} a{\kf32} promise{\kf32} long{\kf32} ago,{\kf32} To
-Dialogue: 0,0:01:56.58,0:01:58.80,Karaoke,,0,0,0,,{\kf32}lead{\kf32} them{\kf32} through,{\kf32} to{\kf32} get{\kf32} them{\kf32} home.
-Dialogue: 0,0:01:58.82,0:02:00.40,Karaoke,,0,0,0,,{\kf32}Through{\kf32} every{\kf32} storm,{\kf32} through{\kf32} every
-Dialogue: 0,0:02:00.42,0:02:02.32,Karaoke,,0,0,0,,{\kf32}flame,{\kf32} The{\kf32} Ranger's{\kf32} oath{\kf32} remains{\kf32} the
-Dialogue: 0,0:02:02.34,0:02:04.24,Karaoke,,0,0,0,,{\kf32}same.{\kf32} I{\kf32} buried{\kf32} dreams{\kf32} beneath{\kf32} these
-Dialogue: 0,0:02:04.26,0:02:06.16,Karaoke,,0,0,0,,{\kf32}stones,{\kf32} Made{\kf32} peace{\kf32} with{\kf32} never{\kf32} going
-Dialogue: 0,0:02:06.18,0:02:08.40,Karaoke,,0,0,0,,{\kf32}home.{\kf32} Until{\kf32} a{\kf32} boy{\kf32} came{\kf32} through{\kf32} that
-Dialogue: 0,0:02:08.42,0:02:10.64,Karaoke,,0,0,0,,{\kf32}ride,{\kf32} And{\kf32} woke{\kf32} the{\kf32} hope{\kf32} I{\kf32} thought
-Dialogue: 0,0:02:10.66,0:02:11.28,Karaoke,,0,0,0,,{\kf32}had{\kf32} died.
-Dialogue: 0,0:02:11.30,0:02:13.52,Karaoke,,0,0,0,,{\kf32}I{\kf32} made{\kf32} a{\kf32} promise{\kf32} long{\kf32} ago,{\kf32} To
-Dialogue: 0,0:02:13.54,0:02:15.76,Karaoke,,0,0,0,,{\kf32}lead{\kf32} them{\kf32} through,{\kf32} to{\kf32} get{\kf32} them{\kf32} home.
-Dialogue: 0,0:02:15.78,0:02:18.00,Karaoke,,0,0,0,,{\kf32}If{\kf32} I{\kf32} must{\kf32} fall{\kf32} to{\kf32} see{\kf32} them
-Dialogue: 0,0:02:18.02,0:02:21.46,Karaoke,,0,0,0,,{\kf32}free,{\kf32} Then{\kf32} that's{\kf32} the{\kf34} price,{\kf94} and{\kf90} let
-Dialogue: 0,0:02:21.48,0:02:23.30,Karaoke,,0,0,0,,{\kf94}it{\kf90} be.
-Dialogue: 0,0:02:23.32,0:02:25.15,Karaoke,,0,0,0,,{\kf94}Thirty{\kf90} years...
-Dialogue: 0,0:02:25.17,0:02:27.93,Karaoke,,0,0,0,,{\kf94}Maybe...{\kf90} just{\kf94} maybe...
-Dialogue: 0,0:02:27.95,0:02:31.61,Karaoke,,0,0,0,,{\kf90}I{\kf94} can{\kf90} get{\kf94} them
-Dialogue: 0,0:02:31.64,0:02:34.48,Karaoke,,0,0,0,,{\kf90}home.{\kf10} I{\kf22} may{\kf56} never{\kf72} see{\kf36} my
-Dialogue: 0,0:02:34.50,0:02:38.24,Karaoke,,0,0,0,,{\kf152}home{\kf224} again,
-Dialogue: 0,0:02:38.26,0:02:42.33,Karaoke,,0,0,0,,{\kf24}But{\kf56} I'll{\kf132} fight{\kf78} until{\kf62} they{\kf30} do.
+Dialogue: 0,0:00:05.46,0:00:09.22,Karaoke,,0,0,0,,{\kf38}Six{\kf66} young{\kf148} friends,{\kf125} one
+Dialogue: 0,0:00:09.24,0:00:12.03,Karaoke,,0,0,0,,{\kf94}summer{\kf81} ride,{\kf78} Through{\kf28} the
+Dialogue: 0,0:00:12.05,0:00:15.45,Karaoke,,0,0,0,,{\kf172}darkness,{\kf72} worlds{\kf98} collide.
+Dialogue: 0,0:00:15.47,0:00:18.97,Karaoke,,0,0,0,,{\kf108}A{\kf104} magic{\kf128} bow,{\kf12} a
+Dialogue: 0,0:00:18.99,0:00:22.69,Karaoke,,0,0,0,,{\kf136}Ranger's{\kf102} name,{\kf70} Dungeon{\kf64} Master
+Dialogue: 0,0:00:22.71,0:00:25.57,Karaoke,,0,0,0,,{\kf78}chose{\kf96} me{\kf40} to{\kf52} lead{\kf22} the
+Dialogue: 0,0:00:25.59,0:00:28.64,Karaoke,,0,0,0,,{\kf156}way.{\kf63} Through{\kf88} dragons'
+Dialogue: 0,0:00:28.66,0:00:31.35,Karaoke,,0,0,0,,{\kf141}fire{\kf42} and{\kf88} endless
+Dialogue: 0,0:00:31.37,0:00:35.27,Karaoke,,0,0,0,,{\kf148}night,{\kf18} I{\kf56} led{\kf50} my{\kf120} friends
+Dialogue: 0,0:00:35.29,0:00:38.25,Karaoke,,0,0,0,,{\kf87}through{\kf69} every{\kf142} fight.
+Dialogue: 0,0:00:38.27,0:00:41.87,Karaoke,,0,0,0,,{\kf34}His{\kf100} riddles{\kf74} drove{\kf68} me{\kf86} half
+Dialogue: 0,0:00:41.89,0:00:45.43,Karaoke,,0,0,0,,{\kf154}insane,{\kf44} But{\kf86} he{\kf72} always
+Dialogue: 0,0:00:45.45,0:00:49.28,Karaoke,,0,0,0,,{\kf82}showed{\kf28} the{\kf274} way.
+Dialogue: 0,0:00:49.30,0:00:52.18,Karaoke,,0,0,0,,{\kf34}Then{\kf70} Dungeon{\kf68} Master{\kf46} passed{\kf72} away,
+Dialogue: 0,0:00:52.20,0:00:55.18,Karaoke,,0,0,0,,{\kf40}And{\kf22} all{\kf40} his{\kf56} answers{\kf38} turned{\kf14} to{\kf90} clay.
+Dialogue: 0,0:00:55.20,0:00:57.93,Karaoke,,0,0,0,,{\kf56}Thirty{\kf46} years{\kf68} beneath{\kf24} these{\kf60} skies,{\kf20} I
+Dialogue: 0,0:00:57.95,0:01:00.31,Karaoke,,0,0,0,,{\kf34}watched{\kf20} the{\kf30} hope{\kf48} fade{\kf46} from{\kf60} our
+Dialogue: 0,0:01:00.33,0:01:02.95,Karaoke,,0,0,0,,{\kf90}eyes.{\kf14} I{\kf42} made{\kf22} a{\kf96} promise
+Dialogue: 0,0:01:02.97,0:01:06.17,Karaoke,,0,0,0,,{\kf162}long{\kf58} ago,{\kf38} To{\kf34} lead{\kf30} them
+Dialogue: 0,0:01:06.19,0:01:08.94,Karaoke,,0,0,0,,{\kf112}through,{\kf98} to{\kf34} get{\kf32} them
+Dialogue: 0,0:01:08.96,0:01:12.88,Karaoke,,0,0,0,,{\kf172}home.{\kf52} Through{\kf46} every{\kf124} storm,
+Dialogue: 0,0:01:12.90,0:01:16.52,Karaoke,,0,0,0,,{\kf106}through{\kf44} every{\kf182} flame,{\kf32} The
+Dialogue: 0,0:01:16.54,0:01:19.58,Karaoke,,0,0,0,,{\kf98}Ranger's{\kf42} oath{\kf138} remains{\kf28} the
+Dialogue: 0,0:01:19.60,0:01:30.17,Karaoke,,0,0,0,,{\kf1058}same.
+Dialogue: 0,0:01:30.19,0:01:34.13,Karaoke,,0,0,0,,{\kf86}I{\kf98} buried{\kf140} dreams{\kf72} beneath
+Dialogue: 0,0:01:34.15,0:01:37.58,Karaoke,,0,0,0,,{\kf56}these{\kf146} stones,{\kf38} Made{\kf70} peace{\kf34} with
+Dialogue: 0,0:01:37.60,0:01:40.34,Karaoke,,0,0,0,,{\kf168}never{\kf108} going
+Dialogue: 0,0:01:40.36,0:01:43.74,Karaoke,,0,0,0,,{\kf143}home.{\kf94} Until{\kf36} a{\kf66} boy
+Dialogue: 0,0:01:43.76,0:01:47.46,Karaoke,,0,0,0,,{\kf64}came{\kf78} through{\kf64} that{\kf146} ride,{\kf20} And
+Dialogue: 0,0:01:47.48,0:01:49.98,Karaoke,,0,0,0,,{\kf48}woke{\kf20} the{\kf58} hope{\kf22} I{\kf58} thought{\kf46} had
+Dialogue: 0,0:01:50.00,0:01:53.77,Karaoke,,0,0,0,,{\kf360}died.{\kf18} I
+Dialogue: 0,0:01:53.79,0:01:57.57,Karaoke,,0,0,0,,{\kf48}made{\kf16} a{\kf68} promise{\kf48} long{\kf200} ago,
+Dialogue: 0,0:01:57.59,0:02:01.27,Karaoke,,0,0,0,,{\kf32}To{\kf40} lead{\kf28} them{\kf174} through,{\kf36} to{\kf32} get{\kf28} them
+Dialogue: 0,0:02:01.29,0:02:05.10,Karaoke,,0,0,0,,{\kf184}home.{\kf46} If{\kf12} I{\kf42} must{\kf98} fall
+Dialogue: 0,0:02:05.12,0:02:08.92,Karaoke,,0,0,0,,{\kf36}to{\kf72} see{\kf34} them{\kf206} free,{\kf34} Then
+Dialogue: 0,0:02:08.94,0:02:12.04,Karaoke,,0,0,0,,{\kf34}that's{\kf16} the{\kf116} price,{\kf40} and{\kf70} let{\kf36} it
+Dialogue: 0,0:02:12.06,0:02:16.64,Karaoke,,0,0,0,,{\kf460}be.
+Dialogue: 0,0:02:16.66,0:02:18.96,Karaoke,,0,0,0,,{\kf56}Thirty{\kf176} years...
+Dialogue: 0,0:02:18.98,0:02:20.62,Karaoke,,0,0,0,,{\kf85}Maybe...{\kf81} just
+Dialogue: 0,0:02:20.64,0:02:25.06,Karaoke,,0,0,0,,{\kf444}maybe...
+Dialogue: 0,0:02:25.08,0:02:28.41,Karaoke,,0,0,0,,{\kf18}I{\kf54} can{\kf46} get{\kf216} them
+Dialogue: 0,0:02:28.43,0:02:32.39,Karaoke,,0,0,0,,{\kf399}home.
+Dialogue: 0,0:02:32.41,0:02:35.82,Karaoke,,0,0,0,,{\kf14}I{\kf28} may{\kf56} never{\kf74} see{\kf40} my{\kf130} home
+Dialogue: 0,0:02:35.84,0:02:39.04,Karaoke,,0,0,0,,{\kf242}again,{\kf40} But{\kf40} I'll
+Dialogue: 0,0:02:39.06,0:02:42.31,Karaoke,,0,0,0,,{\kf136}fight{\kf72} until{\kf62} they{\kf30} do.
