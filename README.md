@@ -85,6 +85,12 @@ python3 make_karaoke_videos.py --platform youtube \
 
 Set `--wide-scroll-ms 350` for the default 350 ms transition, increase it for slower movement, or use `--wide-scroll-ms 0` to disable animated scrolling. Set `--wide-lines 1` to render the original ASS file without changing its layout. Instagram and TikTok retain their existing ASS layouts. The script generates the scrolling/multi-line layout temporarily during video rendering; your original `Hank_wide.ass` file is unchanged.
 
+## Whole-word highlighting for vertical video
+
+TikTok, Instagram Reels, Instagram Stories and Instagram Feed now highlight each **entire word** at its timed onset. During rendering, progressive karaoke `\\kf` tags and outline karaoke `\\ko` tags are converted to whole-word `\\k` tags in a **temporary copy** of the ASS file. Timing, original subtitle files, positioning and line breaks stay unchanged.
+
+Use the updated script in `~/bin` and rerender with `--overwrite`. YouTube retains its five-line smooth-scrolling layout.
+
 ## Platform sizes
 
 | Platform | `--platform` | `--instagram-format` | Size / aspect |
