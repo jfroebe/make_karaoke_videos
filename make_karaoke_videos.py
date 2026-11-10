@@ -70,6 +70,8 @@ def parse_args() -> argparse.Namespace:
                         help="Visible lyric lines for YouTube (1 keeps original ASS layout)")
     parser.add_argument("--wide-scroll-ms", type=int, default=350,
                         help="Wide lyric transition time in milliseconds (0 to disable)")
+    parser.add_argument("--instagram-preview-safe", action="store_true",
+                        help="Keep Reel artwork and lyrics inside feed preview safe area")
     parser.add_argument("--overwrite", action="store_true", help="Overwrite existing videos")
     return parser.parse_args()
 
@@ -175,6 +177,8 @@ def render(label: str, image: Path, audio: Path, ass: Path, target: Path,
                               scroll_ms=args.wide_scroll_ms)
         elif label in ("tiktok", "instagram"):
             build_whole_word_lyrics(ass, temp / "lyrics.ass")
+            if label == "instagram" and args.instagram_preview_safe:
+                position_instagram_safe_lyrics(temp / "lyrics.ass")
         else:
             shutil.copyfile(ass, temp / "lyrics.ass")
         img_width, img_height = image_dimensions(image)
@@ -186,7 +190,19 @@ def render(label: str, image: Path, audio: Path, ass: Path, target: Path,
                 f"({'padding' if fit == 'contain' else 'cropping'}).",
                 flush=True,
             )
-        vf = f"{scale_filter(width, height, fit)},ass=filename=lyrics.ass"
+        if label == "instagram" and args.instagram_preview_safe:
+            # Instagram's 4:5 feed preview centers the middle 1350 pixels
+            # of a full-height 1920-pixel Reel. Put artwork inside it.
+            image_filter = (
+                "scale=1080:1350:force_original_aspect_ratio=decrease,"
+                "pad=1080:1350:(ow-iw)/2:(oh-ih)/2:black,"
+                "pad=1080:1920:0:285:black,setsar=1"
+            )
+            print("Instagram preview-safe: artwork within central 4:5; "
+                  "lyrics raised above the bottom overlay.", flush=True)
+        else:
+            image_filter = scale_filter(width, height, fit)
+        vf = f"{image_filter},ass=filename=lyrics.ass"
         command = [
             "ffmpeg", "-hide_banner", "-nostdin", "-loglevel", "error",
             "-y" if args.overwrite else "-n",
@@ -226,6 +242,51 @@ def build_whole_word_lyrics(source: Path, target: Path) -> None:
             line = re.sub(r"\\(?:kf|ko)(?=\d)", r"\\k", line, flags=re.I)
         lines.append(line)
     target.write_text("".join(lines), encoding="utf-8")
+
+
+def position_instagram_safe_lyrics(path: Path) -> None:
+    """Raise bottom-aligned lyrics into the Reel's central safe viewing area.
+
+    Change only ASS style margins. Karaoke tags, timestamps, and text remain
+    untouched. The vertical 9:16 canvas remains unchanged.
+    """
+    lines = path.read_text(encoding="utf-8-sig").splitlines(keepends=True)
+    style_columns = None
+    in_styles = False
+    modified = 0
+    result = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            in_styles = stripped.lower() in (
+                "[v4+ styles]", "[v4 styles]"
+            )
+        if in_styles and line.startswith("Format:"):
+            style_columns = [
+                column.strip().lower()
+                for column in line.split(":", 1)[1].split(",")
+            ]
+        elif in_styles and line.startswith("Style:"):
+            if style_columns is None or "marginv" not in style_columns:
+                raise ValueError(
+                    "Instagram ASS styles must define a MarginV column"
+                )
+            prefix, values = line.split(":", 1)
+            parts = values.rstrip("\r\n").split(",")
+            if len(parts) != len(style_columns):
+                raise ValueError("Malformed ASS Style line")
+            parts[style_columns.index("marginv")] = "820"
+            for column in ("marginl", "marginr"):
+                if column in style_columns:
+                    index = style_columns.index(column)
+                    parts[index] = str(max(120, int(parts[index])))
+            newline = "\r\n" if line.endswith("\r\n") else "\n"
+            line = prefix + ":" + ",".join(parts) + newline
+            modified += 1
+        result.append(line)
+    if not modified:
+        raise ValueError("Instagram ASS file contains no usable styles")
+    path.write_text("".join(result), encoding="utf-8")
 
 
 def _parse_time(value: str) -> int:
@@ -333,6 +394,13 @@ def main() -> None:
         raise ValueError("--wide-lines must be between 1 and 7")
     if not 0 <= args.wide_scroll_ms <= 2000:
         raise ValueError("--wide-scroll-ms must be between 0 and 2000")
+    if args.instagram_preview_safe and (
+        args.platform not in ("instagram", "all")
+        or args.instagram_format != "reels"
+    ):
+        raise ValueError(
+            "--instagram-preview-safe requires Instagram Reels"
+        )
     if not (0 <= args.crf <= 51):
         raise ValueError("--crf must be between 0 and 51")
     for executable in ("ffmpeg", "ffprobe"):
