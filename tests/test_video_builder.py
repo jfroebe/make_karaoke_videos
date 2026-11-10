@@ -80,13 +80,15 @@ class KaraokeBuilderTests(unittest.TestCase):
                 self.assertIn(f"PlayResX: {size[0]}", data)
                 self.assertIn(f"PlayResY: {size[1]}", data)
                 self.assertEqual(sum(line.startswith("Dialogue:")
-                                     for line in data.splitlines()), 32)
+                                     for line in data.splitlines()),
+                                 44 if name in ("Hank_wide.ass", "Hank_vertical.ass")
+                                 else 45)
                 self.assertEqual(len(re.findall(r"\\kf\d+", data)), 181)
-                self.assertIn("0:01:30.34", data)
-                self.assertIn("0:02:42.33", data)
+                self.assertIn("0:00:05.46", data)
+                self.assertIn("0:02:42.31", data)
 
     def test_uploaded_hank_ass_ffmpeg_filters(self):
-        """Smoke-render the real subtitles with libass on the local machine."""
+        """Smoke-render the corrected subtitles with libass on the local machine."""
         import shutil
 
         if shutil.which("ffmpeg") is None:
@@ -112,7 +114,7 @@ class KaraokeBuilderTests(unittest.TestCase):
                          "color=c=black:s=256x256:r=1:d=1",
                          "-vf",
                          f"scale={width}:{height},"
-                         "setpts=PTS+95/TB,ass=filename=lyrics.ass",
+                         "setpts=PTS+8/TB,ass=filename=lyrics.ass",
                          "-frames:v", "1", "-f", "null", "-"],
                         cwd=scratch, capture_output=True, text=True,
                         timeout=45,
