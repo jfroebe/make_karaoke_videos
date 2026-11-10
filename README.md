@@ -9,13 +9,39 @@ Generate finished karaoke lyric videos using **Python 3**, **FFmpeg**, backgroun
 - FFmpeg compiled with **libass** (`ass` video filter) and **libx264** (H.264 encoder)
 - An audio file, background image(s), and karaoke `.ass` subtitle file(s)
 
-macOS with Homebrew:
+### macOS: use `ffmpeg-full` when required
+
+First check whether your current FFmpeg supports ASS subtitles and H.264 encoding:
+
+```bash
+command -v ffmpeg
+ffmpeg -hide_banner -filters | grep -E '(^|[[:space:]])ass[[:space:]]'
+ffmpeg -hide_banner -encoders | grep libx264
+```
+
+If the ASS filter is missing (or you receive `No such filter: 'ass'`), install a build that includes **libass**:
 
 ```bash
 brew install ffmpeg-full
-ffmpeg -hide_banner -filters | grep ' ass '
+```
+
+Homebrew may install `ffmpeg-full` separately from the currently selected `ffmpeg`. Make sure the **full** executable takes priority for both `ffmpeg` and `ffprobe` when running the video builder:
+
+```bash
+export PATH="$(brew --prefix ffmpeg-full)/bin:$PATH"
+rehash
+command -v ffmpeg
+ffmpeg -hide_banner -filters | grep -E '(^|[[:space:]])ass[[:space:]]'
 ffmpeg -hide_banner -encoders | grep libx264
 ```
+
+If both checks succeed, run the video builder from that same Terminal session. To persist this PATH change for zsh, add the export line to `~/.zshrc`:
+
+```bash
+echo 'export PATH="$(brew --prefix ffmpeg-full)/bin:$PATH"' >> ~/.zshrc
+```
+
+Open a fresh terminal or run `source ~/.zshrc`. **Installing `ffmpeg-full` alone is insufficient if a different FFmpeg executable remains first on PATH.** If the regular FFmpeg already provides the `ass` filter and `libx264`, you do not need to install `ffmpeg-full`.
 
 Use [elysy_to_karaoke_ass](https://github.com/jfroebe/elysy_to_karaoke_ass) to generate the properly timed ASS files from ELYSY's Enhanced SRT or JSON exports.
 
@@ -128,7 +154,9 @@ Full help: `python3 make_karaoke_videos.py --help`.
 
 - **Video layout:** The video builder scales/crops artwork to the requested platform size. It doesn't reposition ASS subtitles; positioning comes from the subtitle converter's profile.
 - **Safe zones:** Instagram and TikTok place UI controls over parts of the video. Preview on a phone before publishing; use the matching Instagram-specific ASS preset.
-- **FFmpeg ASS filter parsing:** Use the current script, which specifies `ass=filename=lyrics.ass` explicitly to avoid ambiguous FFmpeg option parsing. If an older version fails with `No option name near 'lyrics.ass'`, update your local script and try again.\n- **Spaces in paths:** Wrap paths in quotes. The script copies subtitle files to an isolated temporary directory to avoid FFmpeg filter escaping issues.
+- **FFmpeg ASS filter parsing:** Use the current script, which specifies `ass=filename=lyrics.ass` explicitly to avoid ambiguous FFmpeg option parsing. If an older version fails with `No option name near 'lyrics.ass'`, update your local script and try again.
+- **Missing ASS subtitle filter:** If you see `No such filter: 'ass'`, your active FFmpeg lacks libass. Follow the `ffmpeg-full` instructions above, then confirm `command -v ffmpeg` points to the intended binary.
+- **Spaces in paths:** Wrap paths in quotes. The script copies subtitle files to an isolated temporary directory to avoid FFmpeg filter escaping issues.
 - **Existing output:** The script stops instead of overwriting MP4 files unless `--overwrite` is specified.
 - **Missing files:** It prints a concise `Error:` message with a nonzero exit status, not a Python traceback.
 - **Audio:** Do lyric alignment with the **final** song file first so the timing matches the rendered soundtrack.
