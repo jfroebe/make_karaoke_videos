@@ -91,6 +91,34 @@ TikTok, Instagram Reels, Instagram Stories and Instagram Feed now highlight each
 
 Use the updated script in `~/bin` and rerender with `--overwrite`. YouTube retains its five-line smooth-scrolling layout.
 
+## Instagram Reels: aspect ratio and safe areas
+
+Instagram Reels should be exported at **1080 × 1920 (9:16)**. The source
+artwork does not necessarily match this ratio: for example, Hank's uploaded
+`portrait.png` is **1024 × 1536 (2:3)**. Previously the default
+`--fit cover` cropped the sides of this image. The script now defaults to
+`--fit auto`: when an Instagram image differs from the target aspect ratio,
+it uses **contain** to show the entire image with padding rather than
+cropping it. It prints the detected source and destination sizes before
+rendering. You can still request `--fit cover` for an intentional crop.
+
+```bash
+python3 ~/bin/make_karaoke_videos.py \
+  --platform instagram --instagram-format reels \
+  --audio "The_Rangers_Promise_Clear_Rock_Remaster.mp3" \
+  --image-vertical "portrait.png" \
+  --ass-instagram "Hank_instagram-reels.ass" \
+  --fit auto --overwrite
+```
+
+For a full-bleed Reel without padding, create the background artwork at
+1080 × 1920 (or another **9:16** size). Keep essential faces and lyrics
+away from the edges and particularly the bottom and right-hand interface
+overlays. Instagram may **crop the Reel preview in its feed or profile grid**
+even though the uploaded Reel remains 9:16; a centered, safe cover image
+is useful for those previews. The FFmpeg export cannot control cropping
+applied later by Instagram's app.
+
 ## Platform sizes
 
 | Platform | `--platform` | `--instagram-format` | Size / aspect |
@@ -163,7 +191,7 @@ In the landscape image, keep Hank's portraits on the **left** and empty space on
 | `--instagram-format` | `reels` | `reels`, `story`, or `feed` |
 | `--output-dir` | `videos` | Directory for rendered MP4 files |
 | `--name` | Audio filename | Output filename prefix |
-| `--fit` | `cover` | `cover` fills/crops; `contain` letterboxes instead |
+| `--fit` | `auto` | Instagram auto-pads mismatched artwork; `cover` crops; `contain` always pads |
 | `--fps` | `30` | Frame rate: 24, 25, 30, or 60 |
 | `--crf` | `19` | Video quality (0–51, lower means higher quality) |
 | `--preset` | `medium` | libx264 speed/efficiency preset |
