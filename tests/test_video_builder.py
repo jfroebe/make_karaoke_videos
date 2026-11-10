@@ -61,6 +61,64 @@ class KaraokeBuilderTests(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_uploaded_hank_subtitles(self):
+        """Real exported ASS files preserve word timing and expected sizes."""
+        import re
+
+        fixtures = {
+            "Hank_wide.ass": (1920, 1080),
+            "Hank_vertical.ass": (1080, 1920),
+            "Hank_instagram-reels.ass": (1080, 1920),
+            "Hank_instagram-story.ass": (1080, 1920),
+            "Hank_instagram-feed.ass": (1080, 1350),
+        }
+        for name, size in fixtures.items():
+            with self.subTest(file=name):
+                data = (ROOT / "tests" / "fixtures" / name).read_text(
+                    encoding="utf-8-sig"
+                )
+                self.assertIn(f"PlayResX: {size[0]}", data)
+                self.assertIn(f"PlayResY: {size[1]}", data)
+                self.assertEqual(sum(line.startswith("Dialogue:")
+                                     for line in data.splitlines()), 32)
+                self.assertEqual(len(re.findall(r"\\kf\d+", data)), 181)
+                self.assertIn("0:01:30.34", data)
+                self.assertIn("0:02:42.08", data)
+
+    def test_uploaded_hank_ass_ffmpeg_filters(self):
+        """Smoke-render the real subtitles with libass on the local machine."""
+        import shutil
+
+        if shutil.which("ffmpeg") is None:
+            self.skipTest("FFmpeg unavailable")
+        names = {
+            "Hank_wide.ass": (1920, 1080),
+            "Hank_vertical.ass": (1080, 1920),
+            "Hank_instagram-reels.ass": (1080, 1920),
+            "Hank_instagram-story.ass": (1080, 1920),
+            "Hank_instagram-feed.ass": (1080, 1350),
+        }
+        with tempfile.TemporaryDirectory() as folder:
+            scratch = Path(folder)
+            for name, (width, height) in names.items():
+                with self.subTest(file=name):
+                    shutil.copyfile(
+                        ROOT / "tests" / "fixtures" / name,
+                        scratch / "lyrics.ass",
+                    )
+                    result = subprocess.run(
+                        ["ffmpeg", "-hide_banner", "-loglevel", "error",
+                         "-threads", "2", "-f", "lavfi", "-i",
+                         "color=c=black:s=256x256:r=1:d=1",
+                         "-vf",
+                         f"scale={width}:{height},"
+                         "setpts=PTS+95/TB,ass=filename=lyrics.ass",
+                         "-frames:v", "1", "-f", "null", "-"],
+                        cwd=scratch, capture_output=True, text=True,
+                        timeout=45,
+                    )
+                    self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_missing_file_without_traceback(self):
         result = subprocess.run(
             [sys.executable, str(ROOT / "make_karaoke_videos.py"),
