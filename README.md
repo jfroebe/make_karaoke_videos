@@ -162,6 +162,28 @@ Full help: `python3 make_karaoke_videos.py --help`.
 - **Audio:** Do lyric alignment with the **final** song file first so the timing matches the rendered soundtrack.
 - **Platform exports:** This creates MP4 video files; it does **not** upload them to YouTube, Instagram, or TikTok.
 
+## Verified Hank karaoke fixtures (corrected English alignment)
+
+Five **real ASS fixtures** are checked in under `tests/fixtures/`, regenerated from the corrected ELYSY Enhanced SRT at `tests/fixtures/The_Rangers_Promise_Clear_Rock_Remaster_enhanced-SRT_corrected.srt`. Select **English** in ELYSY and avoid extra blank lines or inconsistent whitespace when aligning English vocals.
+
+| Fixture | Video profile | Karaoke lyric lines |
+| --- | --- | ---: |
+| `Hank_wide.ass` | YouTube, 1920 × 1080 | 44 |
+| `Hank_vertical.ass` | TikTok, 1080 × 1920 | 44 |
+| `Hank_instagram-reels.ass` | Reels, 1080 × 1920 | 45 |
+| `Hank_instagram-story.ass` | Stories, 1080 × 1920 | 45 |
+| `Hank_instagram-feed.ass` | Feed, 1080 × 1350 | 45 |
+
+All five preserve **181 karaoke word tags**, begin at **00:00:05.46** and finish at approximately **00:02:42.31** (including the final caption hold). The earlier files incorrectly started at 1:30 because of an ELYSY language/alignment issue. Local FFmpeg/libass rendering was validated for all five corrected files, including against the supplied artwork during the first verse.
+
+To reproduce the fixtures, run the `elysy_to_karaoke_ass.py` converter from [jfroebe/elysy_to_karaoke_ass](https://github.com/jfroebe/elysy_to_karaoke_ass) with each corresponding `--profile`. Example:
+
+```bash
+python3 elysy_to_karaoke_ass.py \
+  tests/fixtures/The_Rangers_Promise_Clear_Rock_Remaster_enhanced-SRT_corrected.srt \
+  --profile wide --output tests/fixtures/Hank_wide.ass
+```
+
 ## Development and local testing
 
 All tests and FFmpeg integration checks should run on the local META environment (`chatgpt-dev` / `chatgpt-build-02`), **not GitHub-hosted runners**. No GitHub Actions workflow is included.
