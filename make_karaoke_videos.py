@@ -114,7 +114,7 @@ def render(label: str, image: Path, audio: Path, ass: Path, target: Path,
     with tempfile.TemporaryDirectory(prefix="karaoke-ass-") as work:
         temp = Path(work)
         shutil.copyfile(ass, temp / "lyrics.ass")
-        vf = f"{scale_filter(width, height, args.fit)},ass=lyrics.ass"
+        vf = f"{scale_filter(width, height, args.fit)},ass=filename=lyrics.ass"
         command = [
             "ffmpeg", "-hide_banner", "-nostdin", "-loglevel", "error",
             "-y" if args.overwrite else "-n",
