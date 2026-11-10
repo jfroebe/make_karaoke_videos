@@ -72,17 +72,18 @@ All outputs contain H.264 video, AAC audio, and **burned-in karaoke subtitles**.
 
 ## YouTube: multi-line karaoke lyrics (default)
 
-The **YouTube landscape renderer now displays five lyric lines at a time** on the right side of the artwork: surrounding lyrics are subdued white, and the current line retains its animated word-level karaoke highlights. This takes advantage of the lyric area without overwhelming the poster or covering the portraits on the left.
+The **YouTube landscape renderer displays five lyric lines at a time** on the right side of the artwork. Lines **glide upward** when the active line changes; surrounding lyrics are subdued white. Each sung word switches to its full highlighted color when that word begins (ASS `\\k` timing, rather than a progressive `\\kf` fill). This takes advantage of the lyric area without overwhelming the poster or covering the portraits on the left.
 
 Use `--wide-lines 5` (the default) or choose 2–7 lines:
 
 ```bash
 python3 make_karaoke_videos.py --platform youtube \
   --audio song.mp3 --image-wide landscape.png \
-  --ass-wide Hank_wide.ass --wide-lines 5 --overwrite
+  --ass-wide Hank_wide.ass --wide-lines 5 \\
+  --wide-scroll-ms 350 --overwrite
 ```
 
-Set `--wide-lines 1` to render the original ASS file without changing its layout. Instagram and TikTok retain their existing ASS layouts. The script generates the scrolling/multi-line layout temporarily during video rendering; your original `Hank_wide.ass` file is unchanged.
+Set `--wide-scroll-ms 350` for the default 350 ms transition, increase it for slower movement, or use `--wide-scroll-ms 0` to disable animated scrolling. Set `--wide-lines 1` to render the original ASS file without changing its layout. Instagram and TikTok retain their existing ASS layouts. The script generates the scrolling/multi-line layout temporarily during video rendering; your original `Hank_wide.ass` file is unchanged.
 
 ## Platform sizes
 
@@ -161,6 +162,7 @@ In the landscape image, keep Hank's portraits on the **left** and empty space on
 | `--crf` | `19` | Video quality (0–51, lower means higher quality) |
 | `--preset` | `medium` | libx264 speed/efficiency preset |
 | `--wide-lines` | `5` | YouTube lyric window size (2–7 lines); `1` preserves the original ASS layout |
+| `--wide-scroll-ms` | `350` | Scroll transition duration in milliseconds (0–2000); 0 disables movement |
 | `--overwrite` | off | Overwrite existing outputs |
 
 Full help: `python3 make_karaoke_videos.py --help`.
