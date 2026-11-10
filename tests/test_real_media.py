@@ -2,7 +2,7 @@
 
 Supply files in a local directory via KARAOKE_MEDIA_DIR. No network requests.
 Tests render only the first 2 seconds for speed; an additional libass frame
-is rendered at 95 seconds so subtitles are actually exercised.
+is rendered at 8 seconds so subtitles are actually exercised.
 """
 from __future__ import annotations
 
@@ -110,7 +110,7 @@ class RealMediaIntegrationTests(unittest.TestCase):
             result = subprocess.run(
                 ["ffmpeg", "-hide_banner", "-nostdin", "-loglevel", "error",
                  "-f", "lavfi", "-i", "color=c=black:s=320x180:r=1:d=1",
-                 "-vf", "scale=1920:1080,setpts=PTS+95/TB,"
+                 "-vf", "scale=1920:1080,setpts=PTS+8/TB,"
                         "ass=filename=lyrics.ass",
                  "-frames:v", "1", "-f", "null", "-"],
                 cwd=work, capture_output=True, text=True, timeout=45,
