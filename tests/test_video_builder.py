@@ -25,6 +25,42 @@ class KaraokeBuilderTests(unittest.TestCase):
         self.assertEqual((PROFILES["instagram"].width, PROFILES["instagram"].height),
                          (1080, 1920))
 
+    def test_ffmpeg_explicit_ass_filename_filter(self):
+        """Smoke-test the exact ASS filter syntax used by the renderer."""
+        import shutil
+
+        if shutil.which("ffmpeg") is None:
+            self.skipTest("FFmpeg is unavailable")
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "lyrics.ass"
+            path.write_text(
+                "[Script Info]\\n".replace("\\n", "\n")
+                + "ScriptType: v4.00+\n"
+                + "PlayResX: 1920\nPlayResY: 1080\n"
+                + "[V4+ Styles]\n"
+                + "Format: Name, Fontname, Fontsize, PrimaryColour, "
+                + "SecondaryColour, OutlineColour, BackColour, Bold, Italic, "
+                + "Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, "
+                + "BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, "
+                + "MarginV, Encoding\n"
+                + "Style: Default,Arial,50,&H00FFFFFF,&H000000FF,"
+                + "&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,"
+                + "10,10,50,1\n"
+                + "[Events]\n"
+                + "Format: Layer, Start, End, Style, Name, MarginL, "
+                + "MarginR, MarginV, Effect, Text\n"
+                + "Dialogue: 0,0:00:00.00,0:00:01.00,Default,,0,0,0,,Hello\n",
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                ["ffmpeg", "-hide_banner", "-loglevel", "error",
+                 "-f", "lavfi", "-i", "color=s=320x180:r=1",
+                 "-vf", "ass=filename=lyrics.ass",
+                 "-frames:v", "1", "-f", "null", "-"],
+                cwd=folder, capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_missing_file_without_traceback(self):
         result = subprocess.run(
             [sys.executable, str(ROOT / "make_karaoke_videos.py"),
