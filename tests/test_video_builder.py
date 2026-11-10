@@ -17,6 +17,40 @@ class KaraokeBuilderTests(unittest.TestCase):
         self.assertIn("crop=1920:1080", scale_filter(1920, 1080, "cover"))
         self.assertIn("pad=1080:1920", scale_filter(1080, 1920, "contain"))
 
+    def test_auto_fit_preserves_instagram_artwork(self):
+        """Reels and Feed must not silently crop portrait artwork."""
+        from make_karaoke_videos import select_fit
+
+        self.assertEqual(
+            select_fit("auto", "instagram", 1024, 1536, 1080, 1920),
+            "contain",
+        )
+        self.assertEqual(
+            select_fit("auto", "instagram", 1080, 1920, 1080, 1920),
+            "cover",
+        )
+        self.assertEqual(
+            select_fit("auto", "instagram", 1080, 1350, 1080, 1350),
+            "cover",
+        )
+        self.assertEqual(
+            select_fit("cover", "instagram", 1024, 1536, 1080, 1920),
+            "cover",
+        )
+        self.assertEqual(
+            select_fit("auto", "youtube", 1672, 941, 1920, 1080),
+            "cover",
+        )
+
+    def test_image_dimensions_for_real_fixture(self):
+        from make_karaoke_videos import image_dimensions
+        from unittest.mock import patch
+
+        with patch("make_karaoke_videos.run_checked", return_value="1024,1536"):
+            self.assertEqual(
+                image_dimensions(Path("portrait.png")), (1024, 1536)
+            )
+
     def test_platform_dimensions(self):
         self.assertEqual((PROFILES["youtube"].width, PROFILES["youtube"].height),
                          (1920, 1080))
