@@ -144,6 +144,28 @@ class KaraokeBuilderTests(unittest.TestCase):
                     self.assertNotIn(r"\kf", after)
                     self.assertEqual(before.replace(r"\kf", r"\k"), after)
 
+    def test_vertical_converts_kf_and_ko_but_not_other_tags(self):
+        """Converts actual ASS tags while preserving the rest of each event."""
+        from make_karaoke_videos import build_whole_word_lyrics
+
+        with tempfile.TemporaryDirectory() as folder:
+            src = Path(folder) / "original.ass"
+            dst = Path(folder) / "converted.ass"
+            src.write_text(
+                "[Script Info]\nTitle: Keep metadata\n[Events]\n"
+                "Dialogue: 0,0:00:01.00,0:00:04.00,Karaoke,,0,0,0,,"
+                r"{\kf40}One {\ko50}two {\k30}three" + "\n"
+                "Comment: 0,0:00:00.00,0:00:05.00,Default,,0,0,0,,"
+                r"{\kf20}metadata is not a lyric" + "\n",
+                encoding="utf-8",
+            )
+            build_whole_word_lyrics(src, dst)
+            result = dst.read_text(encoding="utf-8")
+            self.assertIn(r"{\k40}One {\k50}two {\k30}three", result)
+            self.assertIn(r"{\kf20}metadata is not a lyric", result)
+            self.assertNotIn(r"{\kf40}", result)
+            self.assertNotIn(r"{\ko50}", result)
+
     def test_missing_file_without_traceback(self):
         result = subprocess.run(
             [sys.executable, str(ROOT / "make_karaoke_videos.py"),
