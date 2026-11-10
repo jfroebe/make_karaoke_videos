@@ -143,6 +143,8 @@ def render(label: str, image: Path, audio: Path, ass: Path, target: Path,
         if label == "youtube" and args.wide_lines > 1:
             build_wide_lyrics(ass, temp / "lyrics.ass", visible=args.wide_lines,
                               scroll_ms=args.wide_scroll_ms)
+        elif label in ("tiktok", "instagram"):
+            build_whole_word_lyrics(ass, temp / "lyrics.ass")
         else:
             shutil.copyfile(ass, temp / "lyrics.ass")
         vf = f"{scale_filter(width, height, args.fit)},ass=filename=lyrics.ass"
@@ -169,6 +171,22 @@ def render(label: str, image: Path, audio: Path, ass: Path, target: Path,
 DIALOGUE_PREFIX = "Dialogue:"
 OVERRIDE_TAG = re.compile(r"\{[^}]*\}")
 FILL_TAG = re.compile(r"\\kf(?=\d)", re.IGNORECASE)
+
+
+def build_whole_word_lyrics(source: Path, target: Path) -> None:
+    """Change karaoke fill to entire-word highlighting for vertical videos.
+
+    Convert ASS karaoke \\kf (progressive fill) and \\ko (outline) timing
+    to \\k (whole-word) timing without changing the duration, styles,
+    positioning or any other event content.
+    """
+    data = source.read_text(encoding="utf-8-sig")
+    lines = []
+    for line in data.splitlines(keepends=True):
+        if line.startswith("Dialogue:"):
+            line = re.sub(r"\\\\(?:kf|ko)(?=\\d)", r"\\\\k", line, flags=re.I)
+        lines.append(line)
+    target.write_text("".join(lines), encoding="utf-8")
 
 
 def _parse_time(value: str) -> int:
