@@ -194,7 +194,7 @@ def build_wide_lyrics(source: Path, target: Path, visible: int = 5,
 
     Each successive window animates shared lines from their previous positions
     over scroll_ms milliseconds. ASS \\k highlights a whole word at its onset,
-    unlike \kf, which progressively fills the word as it is sung.
+    unlike \\kf, which progressively fills the word as it is sung.
     """
     if not 2 <= visible <= 7:
         raise ValueError("Wide lyric window must show between 2 and 7 lines")
