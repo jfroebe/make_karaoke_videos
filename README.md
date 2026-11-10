@@ -70,6 +70,20 @@ videos/
 
 All outputs contain H.264 video, AAC audio, and **burned-in karaoke subtitles**. Video length is derived from the audio using FFprobe. MP4 files are optimized for web playback (`+faststart`).
 
+## YouTube: multi-line karaoke lyrics (default)
+
+The **YouTube landscape renderer now displays five lyric lines at a time** on the right side of the artwork: surrounding lyrics are subdued white, and the current line retains its animated word-level karaoke highlights. This takes advantage of the lyric area without overwhelming the poster or covering the portraits on the left.
+
+Use `--wide-lines 5` (the default) or choose 2–7 lines:
+
+```bash
+python3 make_karaoke_videos.py --platform youtube \
+  --audio song.mp3 --image-wide landscape.png \
+  --ass-wide Hank_wide.ass --wide-lines 5 --overwrite
+```
+
+Set `--wide-lines 1` to render the original ASS file without changing its layout. Instagram and TikTok retain their existing ASS layouts. The script generates the scrolling/multi-line layout temporarily during video rendering; your original `Hank_wide.ass` file is unchanged.
+
 ## Platform sizes
 
 | Platform | `--platform` | `--instagram-format` | Size / aspect |
@@ -146,6 +160,7 @@ In the landscape image, keep Hank's portraits on the **left** and empty space on
 | `--fps` | `30` | Frame rate: 24, 25, 30, or 60 |
 | `--crf` | `19` | Video quality (0–51, lower means higher quality) |
 | `--preset` | `medium` | libx264 speed/efficiency preset |
+| `--wide-lines` | `5` | YouTube lyric window size (2–7 lines); `1` preserves the original ASS layout |
 | `--overwrite` | off | Overwrite existing outputs |
 
 Full help: `python3 make_karaoke_videos.py --help`.
