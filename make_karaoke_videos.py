@@ -68,6 +68,8 @@ def parse_args() -> argparse.Namespace:
                                  "medium", "slow", "slower"))
     parser.add_argument("--wide-lines", type=int, default=5,
                         help="Visible lyric lines for YouTube (1 keeps original ASS layout)")
+    parser.add_argument("--wide-scroll-ms", type=int, default=350,
+                        help="Wide lyric transition time in milliseconds (0 to disable)")
     parser.add_argument("--overwrite", action="store_true", help="Overwrite existing videos")
     return parser.parse_args()
 
@@ -139,7 +141,8 @@ def render(label: str, image: Path, audio: Path, ass: Path, target: Path,
     with tempfile.TemporaryDirectory(prefix="karaoke-ass-") as work:
         temp = Path(work)
         if label == "youtube" and args.wide_lines > 1:
-            build_wide_lyrics(ass, temp / "lyrics.ass", visible=args.wide_lines)
+            build_wide_lyrics(ass, temp / "lyrics.ass", visible=args.wide_lines,
+                              scroll_ms=args.wide_scroll_ms)
         else:
             shutil.copyfile(ass, temp / "lyrics.ass")
         vf = f"{scale_filter(width, height, args.fit)},ass=filename=lyrics.ass"
@@ -165,6 +168,7 @@ def render(label: str, image: Path, audio: Path, ass: Path, target: Path,
 
 DIALOGUE_PREFIX = "Dialogue:"
 OVERRIDE_TAG = re.compile(r"\{[^}]*\}")
+FILL_TAG = re.compile(r"\\kf(?=\d)", re.IGNORECASE)
 
 
 def _parse_time(value: str) -> int:
@@ -184,20 +188,27 @@ def _format_time(value: int) -> str:
     return f"{hours}:{minutes:02}:{seconds:02}.{centiseconds:02}"
 
 
-def build_wide_lyrics(source: Path, target: Path, visible: int = 5) -> None:
-    """Render neighboring lines continuously while highlighting the active line.
+def build_wide_lyrics(source: Path, target: Path, visible: int = 5,
+                      scroll_ms: int = 350) -> None:
+    """Build smooth-moving lyric windows with whole-word karaoke highlights.
 
-    A new ASS event window is displayed for each original lyric line. The
-    active line preserves its original word-level karaoke timing.
+    Each successive window animates shared lines from their previous positions
+    over scroll_ms milliseconds. ASS \k highlights a whole word at its onset,
+    unlike \kf, which progressively fills the word as it is sung.
     """
     if not 2 <= visible <= 7:
         raise ValueError("Wide lyric window must show between 2 and 7 lines")
+    if not 0 <= scroll_ms <= 2000:
+        raise ValueError("--wide-scroll-ms must be between 0 and 2000")
 
     data = source.read_text(encoding="utf-8-sig")
-    header: list[str] = []
-    lyrics: list[tuple[int, int, str, str]] = []
+    header = []
+    lyrics = []
+    in_events = False
     for line in data.splitlines():
-        if not line.startswith(DIALOGUE_PREFIX):
+        if line.strip().lower() == "[events]":
+            in_events = True
+        if not (in_events and line.startswith(DIALOGUE_PREFIX)):
             header.append(line)
             continue
         fields = line.split(",", 9)
@@ -206,36 +217,55 @@ def build_wide_lyrics(source: Path, target: Path, visible: int = 5) -> None:
         start, end = _parse_time(fields[1]), _parse_time(fields[2])
         if end <= start:
             raise ValueError("ASS lyric event must have a positive duration")
+        if lyrics and start < lyrics[-1][0]:
+            raise ValueError("ASS lyrics must be sorted by start time")
         lyrics.append((start, end, fields[3], fields[9]))
 
     if not lyrics:
         raise ValueError("No ASS Dialogue events found for wide lyric layout")
 
     center_x = 1480
-    center_y = 550
     line_step = 96 if visible <= 5 else 76
-    first_y = center_y - (visible - 1) * line_step // 2
+    first_y = 550 - (visible - 1) * line_step // 2
     result = header[:]
+    total = len(lyrics)
     for i, (start, end, style, _) in enumerate(lyrics):
-        window_start = max(0, min(i - visible // 2, len(lyrics) - visible))
-        window = lyrics[window_start:window_start + visible]
-        for slot, (_, _, _, text) in enumerate(window):
-            pos_y = first_y + slot * line_step
-            active = window_start + slot == i
+        segment_end = lyrics[i + 1][0] if i + 1 < total else end
+        if segment_end <= start:
+            continue
+        window_start = max(0, min(i - visible // 2, total - visible))
+        previous_start = max(
+            0, min(i - 1 - visible // 2, total - visible)
+        )
+        transition = min(scroll_ms, (segment_end - start) * 10)
+        for slot, j in enumerate(range(window_start, min(total, window_start + visible))):
+            _, _, _, text = lyrics[j]
+            y = first_y + slot * line_step
+            prev_y = first_y + (j - previous_start) * line_step
+            movement = (f"\\move({center_x},{prev_y},{center_x},{y},"
+                        f"0,{transition})" if prev_y != y and transition
+                        else f"\\pos({center_x},{y})")
+            active = j == i
             if active:
-                prefix = (f"{{\\an5\\pos({center_x},{pos_y})"
-                          f"\\fs42\\bord3\\shad1}}")
-                rendered = prefix + text
+                # \k switches the entire word to the primary color at onset.
+                rendered = FILL_TAG.sub(r"\\k", text)
+                appearance = r"\fs42\bord3\shad1"
             else:
-                plain = OVERRIDE_TAG.sub("", text)
-                prefix = (f"{{\\an5\\pos({center_x},{pos_y})"
-                          f"\\fs40\\bord2\\shad1\\1c&HFFFFFF&"
-                          f"\\alpha&H55&}}")
-                rendered = prefix + plain
+                rendered = OVERRIDE_TAG.sub("", text)
+                appearance = (r"\fs40\bord2\shad1"
+                              r"\1c&HFFFFFF&\alpha&H55&")
+            fade = (f"\\fad({min(180, transition)},0)"
+                    if j >= previous_start + visible and transition else "")
+            next_start = max(
+                0, min(i + 1 - visible // 2, total - visible)
+            )
+            if j < next_start and transition:
+                fade = f"\\fad(0,{min(180, transition)})"
+            override = f"{{\\an5{movement}{appearance}{fade}}}"
             result.append(
                 "Dialogue: 0,"
-                f"{_format_time(start)},{_format_time(end)},"
-                f"{style},,0,0,0,,{rendered}"
+                f"{_format_time(start)},{_format_time(segment_end)},"
+                f"{style},,0,0,0,,{override}{rendered}"
             )
     target.write_text("\n".join(result) + "\n", encoding="utf-8")
 
@@ -244,6 +274,8 @@ def main() -> None:
     args = parse_args()
     if not 1 <= args.wide_lines <= 7:
         raise ValueError("--wide-lines must be between 1 and 7")
+    if not 0 <= args.wide_scroll_ms <= 2000:
+        raise ValueError("--wide-scroll-ms must be between 0 and 2000")
     if not (0 <= args.crf <= 51):
         raise ValueError("--crf must be between 0 and 51")
     for executable in ("ffmpeg", "ffprobe"):
