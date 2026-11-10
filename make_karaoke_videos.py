@@ -88,8 +88,9 @@ def run_checked(command: list[str], cwd: Path | None = None) -> str:
 def validate_ffmpeg_features() -> None:
     """Fail early when the installed FFmpeg cannot render ASS karaoke."""
     filters = run_checked(["ffmpeg", "-hide_banner", "-filters"])
-    if not any(line.split()[-1] == "ass" for line in filters.splitlines()
-               if line.split()):
+    if not any(len(parts) >= 2 and parts[1] == "ass"
+               for line in filters.splitlines()
+               if (parts := line.split())):
         raise ValueError(
             "This FFmpeg build does not include the 'ass' subtitle filter "
             "(libass). On macOS, install 'brew install ffmpeg-full' and "
