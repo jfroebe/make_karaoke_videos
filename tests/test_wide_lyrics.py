@@ -29,9 +29,12 @@ class WideLyricTests(unittest.TestCase):
             self.assertEqual(len(original), 44)
             self.assertEqual(len(generated), len(original) * 5)
             self.assertIn(r"\pos(1480,", data)
-            self.assertEqual(data.count(r"\kf"), source.count(r"\kf"))
+            self.assertEqual(data.count(r"\k"), source.count(r"\kf"))
+            self.assertNotIn(r"\kf", data)
+            self.assertIn(r"\move(1480,", data)
+            self.assertIn(r"\fad(", data)
             # Context text should not animate karaoke tags.
-            self.assertEqual(sum(r"\kf" in line for line in generated), 44)
+            self.assertEqual(sum(r"\k" in line for line in generated), 44)
             # First lyric starts early, not 90 seconds in.
             self.assertTrue(generated[0].startswith("Dialogue: 0,0:00:05.46,"))
 
@@ -47,6 +50,15 @@ class WideLyricTests(unittest.TestCase):
                     )
                     self.assertEqual(generated, 44 * count)
 
+    def test_scroll_is_configurable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            still = Path(tmp) / "still.ass"
+            moving = Path(tmp) / "moving.ass"
+            build_wide_lyrics(HANK_ASS, still, scroll_ms=0)
+            build_wide_lyrics(HANK_ASS, moving, scroll_ms=750)
+            self.assertNotIn(r"\move(", still.read_text())
+            self.assertIn(",750)", moving.read_text())
+
     def test_invalid_window_sizes(self):
         with tempfile.TemporaryDirectory() as tmp:
             for count in (0, 1, 8):
@@ -55,6 +67,14 @@ class WideLyricTests(unittest.TestCase):
                         build_wide_lyrics(
                             HANK_ASS, Path(tmp) / "out.ass", visible=count
                         )
+
+    def test_invalid_scroll_durations(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for value in (-1, 2001):
+                with self.subTest(value=value):
+                    with self.assertRaises(ValueError):
+                        build_wide_lyrics(HANK_ASS, Path(tmp) / "out.ass",
+                                          scroll_ms=value)
 
     @unittest.skipUnless(shutil.which("ffmpeg"), "FFmpeg not installed")
     def test_ffmpeg_renders_generated_window(self):
