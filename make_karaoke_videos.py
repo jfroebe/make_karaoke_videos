@@ -59,8 +59,8 @@ def parse_args() -> argparse.Namespace:
                         help="Destination folder")
     parser.add_argument("--name", default=None,
                         help="Output filename prefix (defaults to audio stem)")
-    parser.add_argument("--fit", choices=("cover", "contain"), default="cover",
-                        help="Cover crops to fill; contain uses black letterboxing")
+    parser.add_argument("--fit", choices=("auto", "cover", "contain"), default="auto",
+                        help="Auto preserves artwork for Instagram; cover crops; contain pads")
     parser.add_argument("--fps", type=int, choices=(24, 25, 30, 60), default=30)
     parser.add_argument("--crf", type=int, default=19, help="H.264 quality (lower is better)")
     parser.add_argument("--preset", default="medium",
@@ -126,6 +126,36 @@ def audio_duration(path: Path) -> float:
     return seconds
 
 
+def image_dimensions(image: Path) -> tuple[int, int]:
+    """Read source image dimensions with FFprobe, without extra dependencies."""
+    output = run_checked([
+        "ffprobe", "-v", "error", "-select_streams", "v:0",
+        "-show_entries", "stream=width,height",
+        "-of", "csv=p=0", str(image),
+    ])
+    try:
+        width_str, height_str = output.split(",")
+        image_width, image_height = int(width_str), int(height_str)
+    except (ValueError, TypeError) as exc:
+        raise ValueError(f"Cannot determine image dimensions: {image}") from exc
+    if image_width <= 0 or image_height <= 0:
+        raise ValueError(f"Invalid image dimensions: {image}")
+    return image_width, image_height
+
+
+def select_fit(requested: str, label: str, image_width: int,
+               image_height: int, output_width: int,
+               output_height: int) -> str:
+    """Avoid cropping Instagram artwork unless cover was explicitly requested."""
+    if requested != "auto":
+        return requested
+    if label == "instagram" and (
+        abs(image_width / image_height - output_width / output_height) > 0.005
+    ):
+        return "contain"
+    return "cover"
+
+
 def scale_filter(width: int, height: int, fit: str) -> str:
     if fit == "cover":
         return (f"scale={width}:{height}:force_original_aspect_ratio=increase,"
@@ -147,7 +177,16 @@ def render(label: str, image: Path, audio: Path, ass: Path, target: Path,
             build_whole_word_lyrics(ass, temp / "lyrics.ass")
         else:
             shutil.copyfile(ass, temp / "lyrics.ass")
-        vf = f"{scale_filter(width, height, args.fit)},ass=filename=lyrics.ass"
+        img_width, img_height = image_dimensions(image)
+        fit = select_fit(args.fit, label, img_width, img_height, width, height)
+        if abs(img_width / img_height - width / height) > 0.005:
+            print(
+                f"Image aspect ratio: {img_width}x{img_height}; "
+                f"target: {width}x{height}; using {fit} fit "
+                f"({'padding' if fit == 'contain' else 'cropping'}).",
+                flush=True,
+            )
+        vf = f"{scale_filter(width, height, fit)},ass=filename=lyrics.ass"
         command = [
             "ffmpeg", "-hide_banner", "-nostdin", "-loglevel", "error",
             "-y" if args.overwrite else "-n",
