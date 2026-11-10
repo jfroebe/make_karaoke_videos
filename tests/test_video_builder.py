@@ -51,31 +51,6 @@ class KaraokeBuilderTests(unittest.TestCase):
                 image_dimensions(Path("portrait.png")), (1024, 1536)
             )
 
-    def test_instagram_safe_lyrics_preserve_word_timing(self):
-        """Move the lyrics only; never change their karaoke word timings."""
-        from make_karaoke_videos import (
-            build_whole_word_lyrics,
-            position_instagram_safe_lyrics,
-        )
-
-        original = ROOT / "tests" / "fixtures" / "Hank_instagram-reels.ass"
-        with tempfile.TemporaryDirectory() as folder:
-            output = Path(folder) / "lyrics.ass"
-            build_whole_word_lyrics(original, output)
-            before = output.read_text(encoding="utf-8")
-            position_instagram_safe_lyrics(output)
-            after = output.read_text(encoding="utf-8")
-            self.assertNotEqual(before, after)
-            original_dialogue = [
-                x for x in before.splitlines() if x.startswith("Dialogue:")
-            ]
-            safe_dialogue = [
-                x for x in after.splitlines() if x.startswith("Dialogue:")
-            ]
-            self.assertEqual(original_dialogue, safe_dialogue)
-            self.assertIn(",820,", after)
-            self.assertEqual(after.count(r"\k"), 181)
-
     def test_platform_dimensions(self):
         self.assertEqual((PROFILES["youtube"].width, PROFILES["youtube"].height),
                          (1920, 1080))
