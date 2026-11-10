@@ -119,6 +119,28 @@ even though the uploaded Reel remains 9:16; a centered, safe cover image
 is useful for those previews. The FFmpeg export cannot control cropping
 applied later by Instagram's app.
 
+## Instagram Reel preview-safe mode
+
+If Instagram crops your Reel in feed previews, add
+`--instagram-preview-safe`. This still exports **1080 × 1920 (9:16)**, but
+centers the complete background inside the middle **1080 × 1350 (4:5)**
+area and raises karaoke lyrics above the bottom UI. It may leave black
+space at the top or bottom in the full-screen player; this is intentional
+so that cropped feed previews do not cut off important imagery.
+
+```bash
+python3 ~/bin/make_karaoke_videos.py \
+  --platform instagram --instagram-format reels \
+  --audio "The_Rangers_Promise_Clear_Rock_Remaster.mp3" \
+  --image-vertical "portrait.png" \
+  --ass-instagram "Hank_instagram-reels.ass" \
+  --instagram-preview-safe --overwrite
+```
+
+This protects against the **feed-preview crop**, not Instagram's variable
+interface overlays or any app-side cropping outside the central 4:5 area.
+Check both the full-screen player and the in-feed preview.
+
 ## Platform sizes
 
 | Platform | `--platform` | `--instagram-format` | Size / aspect |
